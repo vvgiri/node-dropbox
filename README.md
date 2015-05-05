@@ -53,10 +53,6 @@ DELETE file/folder(recursively)
 curl -v "http://127.0.0.1:8000/foo/bar.js" -X DELETE
 curl -v "http://127.0.0.1:8000/foo/" -X DELETE
 ```
-#### usage and gif reference
-
-
-
 
 ## client-server tcp connection
 
@@ -68,3 +64,5 @@ Setup a tcp server using nssocket and used to sync the changes on the server to 
  - the remote server uses /tmp/server folder and the tcp client uses /tmp/client folder. 
 
 #### usage and gif reference
+
+![alt tag](https://github.com/vvgiri/node-dropbox/blob/master/recordings.gif)
