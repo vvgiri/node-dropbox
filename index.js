@@ -9,15 +9,11 @@ let mkdirp = require('mkdirp')
 let argv = require('yargs').argv
 let nssocket = require('nssocket')
 
-//use of promise
+
 require('songbird')
 
-//let dirName = argv.dir || process.cwd()
-//const NODE_ENV = process.env.NODE_ENV || 'development'
 const PORT = process.env.PORT || 8000
-//const TCP_PORT = 6785
 
-//const ROOT_DIR = path.resolve(dirName)
 const LIST_TCP_EVENT_MAP = {
  'create': 'CREATE',
  'update': 'UPDATE',
@@ -39,10 +35,6 @@ let tcpServer = nssocket.createServer(function (socket) {
 	})
 }).listen(6785);
 
-
-//if(NODE_ENV === 'development') {
-//	app.use(morgan('dev'))
-//}
 
 app.listen(PORT, () => console.log(`Server LISTENING on http://127.0.0.1:${PORT}`))
 
@@ -87,7 +79,7 @@ app.put('*', setFileMeta, setDirInfo, (req, res, next) => {
 	async () => {
 		if(req.stat) return res.status(405).send('File does exists') //res.send(405, 'File does exists')
 
-		await mkdirp.promise(dirPath)
+		await mkdirp.promise(req.dirPath)
 
 		if (!req.isDir) {
 			req.pipe(fs.createWriteStream(req.filePath))
@@ -95,7 +87,7 @@ app.put('*', setFileMeta, setDirInfo, (req, res, next) => {
 
 		if(tcpSocket) {
 			let data = await fs.promise.readFile(req.filePath, {encoding: 'base64'})
-			let payload = outboundTCP('create', req.url, req.isDir, data).catch(e => console.log(e.stack))   	
+			let payload = outboundTCP('create', req.url, req.isDir, data)   	
 			tcpSocket.send([LIST_TCP_EVENT_MAP.create], payload);
 		}
 		res.end()
@@ -104,8 +96,8 @@ app.put('*', setFileMeta, setDirInfo, (req, res, next) => {
 
 app.post('*', setFileMeta, setDirInfo, (req, res, next) => {
 	async () => {
-		if(!req.stat) return res.status(405).send('File doesnt exists')//res.send(405, 'File doesnt exists')
-		if(req.isDir) return res.status(405).send('It is a directory') //res.send(405, 'It is a directory')
+		if(!req.stat) return res.status(405).send('File doesnt exists')
+		if(req.isDir) return res.status(405).send('It is a directory') 
 						 
 		await fs.promise.truncate(req.filePath, 0)	
 		req.pipe(fs.createWriteStream(req.filePath))		
@@ -142,7 +134,7 @@ function setDirInfo(req, res, next) {
 function setFileMeta (req, res, next) {	
 	req.filePath = path.resolve(path.join(ROOT_DIR, req.url))	
 	if(req.filePath.indexOf(ROOT_DIR) !== 0) {
-		return res.status(400).send('Invalid Path')//res.send(400, 'Invalid path')
+		return res.status(400).send('Invalid Path')
 		//return
 	}
 	fs.promise

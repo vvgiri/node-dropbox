@@ -9,7 +9,6 @@ require('songbird')
 
 let dirName = argv.dir || path.join(process.cwd(), 'client-files')
 
-//const TCP_PORT = 6785
 const ROOT_DIR = path.resolve(dirName)
 const LIST_TCP_EVENT_MAP = {
  'create': 'CREATE',
@@ -70,15 +69,13 @@ async function writeDataToFile (payload) {
 	let filePath = path.resolve(path.join(ROOT_DIR, payload.path))
 	if(payload.action === 'create') {
 		let dirPath = getDirPath(filePath, payload.type)
-		// create the directory path first
+
 		await mkdirp.promise(dirPath)
 	} else if(payload.action === 'update') {
-		// turncate existing file
 		await fs.promise.truncate(filePath, 0)	
 	}
 	
 	if(payload.type === 'file') {
-		//write payload.contents to that filePath
 		await fs.promise.writeFile(filePath, payload.contents, {encoding: 'base64'});
 	}
 	sendSuccessAck(payload.action)
